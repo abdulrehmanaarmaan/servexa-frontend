@@ -117,7 +117,7 @@ export default async function ServiceDetailPage({
       {/* Main Detail Section */}
       <section className="mx-auto max-w-4xl px-4 pt-10 sm:px-6 lg:px-8">
         <article className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 shadow-2xl backdrop-blur-xl">
-          <div className="h-2 w-full bg-gradient-to-r from-teal-400 to-emerald-400" />
+          <div className="h-2 w-full bg-linear-to-r from-teal-400 to-emerald-400" />
 
           <div className="p-6 sm:p-10 lg:p-12">
             {/* Header Details */}
