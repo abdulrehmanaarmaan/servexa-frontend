@@ -24,7 +24,7 @@ export default function NotFound() {
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-32 -left-32 size-[400px] rounded-full bg-emerald-500/10 blur-[100px]"
+          className="pointer-events-none absolute -bottom-32 -left-32 size-100 rounded-full bg-emerald-500/10 blur-[100px]"
         />
 
         {/* Main card */}
