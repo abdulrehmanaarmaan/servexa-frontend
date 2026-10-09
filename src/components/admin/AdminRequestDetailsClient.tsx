@@ -83,23 +83,6 @@ const statusLabels: Record<ServiceRequestStatus, string> = {
   CANCELLED: "Cancelled",
 };
 
-const getStatusVariant = (
-  status: ServiceRequestStatus,
-) => {
-  switch (status) {
-    case "REJECTED":
-    case "CANCELLED":
-      return "destructive" as const;
-
-    case "APPROVED":
-    case "CONVERTED":
-      return "secondary" as const;
-
-    default:
-      return "outline" as const;
-  }
-};
-
 const getStatusClassName = (
   status: ServiceRequestStatus,
 ) => {
