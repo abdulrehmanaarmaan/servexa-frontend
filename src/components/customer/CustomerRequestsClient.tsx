@@ -54,15 +54,6 @@ import {
 
 const PAGE_SIZE = 10;
 
-const statusLabels: Record<ServiceRequestStatus, string> = {
-  PENDING: "Pending",
-  REVIEWED: "Reviewed",
-  APPROVED: "Approved",
-  REJECTED: "Rejected",
-  CONVERTED: "Converted",
-  CANCELLED: "Cancelled",
-};
-
 const getStatusVariant = (status: ServiceRequestStatus) => {
   switch (status) {
     case "REJECTED":
