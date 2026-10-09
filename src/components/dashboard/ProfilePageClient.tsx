@@ -17,7 +17,7 @@ export function ProfilePageClient() {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-[400px] items-center justify-center text-teal-400">
+            <div className="flex min-h-100 items-center justify-center text-teal-400">
                 <Loader2 className="size-8 animate-spin" />
             </div>
         );
