@@ -207,7 +207,7 @@ export default async function HomePage() {
 
               <h1 className="mt-6 max-w-4xl text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl lg:leading-[1.08]">
                 From service request to{" "}
-                <span className="bg-gradient-to-r from-teal-200 via-teal-400 to-emerald-400 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-teal-200 via-teal-400 to-emerald-400 bg-clip-text text-transparent">
                   completed work.
                 </span>
               </h1>
