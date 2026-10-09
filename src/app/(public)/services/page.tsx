@@ -249,7 +249,7 @@ export default async function ServicesPage({
                                     key={service.id}
                                     className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/40 hover:shadow-teal-500/5"
                                 >
-                                    <div className="h-1.5 w-full bg-gradient-to-r from-teal-400 to-emerald-400" />
+                                    <div className="h-1.5 w-full bg-linear-to-r from-teal-400 to-emerald-400" />
 
                                     <div className="flex flex-1 flex-col p-6">
                                         <div className="flex items-start justify-between gap-3">
