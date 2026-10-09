@@ -193,7 +193,7 @@ export default async function HomePage() {
     <main className="overflow-hidden bg-slate-950 text-slate-100 selection:bg-teal-500 selection:text-slate-950">
       {/* Hero */}
       <section className="relative">
-        <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[650px] bg-[radial-gradient(circle_at_50%_0%,rgba(45,212,191,0.15),transparent_65%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-162.5 bg-[radial-gradient(circle_at_50%_0%,rgba(45,212,191,0.15),transparent_65%)]" />
 
         <div className="pointer-events-none absolute -right-40 top-20 -z-10 size-105 rounded-full bg-teal-500/10 blur-[120px]" />
 
