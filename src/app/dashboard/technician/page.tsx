@@ -143,7 +143,7 @@ function TechnicianCard({
 }) {
     return (
         <Card className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/40 hover:shadow-teal-500/5">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-400 to-emerald-400 opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-teal-400 to-emerald-400 opacity-0 transition-opacity group-hover:opacity-100" />
             <CardContent className="flex h-full flex-col justify-between space-y-6 p-6 sm:p-7">
                 <div className="space-y-4">
                     <div className="flex size-12 items-center justify-center rounded-2xl border border-teal-400/20 bg-teal-400/10 text-teal-300 shadow-inner">
