@@ -160,6 +160,6 @@ export function proxy(request: NextRequest) {
 export const config = {
     matcher: [
         "/auth/:path*",
-        "/dashboard/:path*",
+        "/dashboard/:path*"
     ],
 };
