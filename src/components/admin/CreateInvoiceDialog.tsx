@@ -115,7 +115,7 @@ export default function CreateInvoiceDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="overflow-hidden border border-white/10 bg-slate-900/95 text-slate-100 backdrop-blur-2xl sm:max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-400 to-emerald-400" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-teal-400 to-emerald-400" />
 
                 <DialogHeader className="space-y-3">
                     <div className="flex items-center gap-3.5">
