@@ -22,7 +22,6 @@ import {
   MapPin,
   RefreshCw,
   UserRound,
-  XCircle,
 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
