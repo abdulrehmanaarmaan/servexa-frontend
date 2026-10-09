@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Clock, Plus, Calendar, Trash2, Edit3, X } from "lucide-react";
+import { Plus, Calendar, Trash2, Edit3, X } from "lucide-react";
 
 import { apiFetch } from "@/lib/api";
 import { endpoints } from "@/lib/endpoints";
