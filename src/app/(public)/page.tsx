@@ -195,7 +195,7 @@ export default async function HomePage() {
       <section className="relative">
         <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[650px] bg-[radial-gradient(circle_at_50%_0%,rgba(45,212,191,0.15),transparent_65%)]" />
 
-        <div className="pointer-events-none absolute -right-40 top-20 -z-10 size-[420px] rounded-full bg-teal-500/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -right-40 top-20 -z-10 size-105 rounded-full bg-teal-500/10 blur-[120px]" />
 
         <div className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 lg:px-8 lg:pb-32 lg:pt-24">
           <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
