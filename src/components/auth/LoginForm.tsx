@@ -100,6 +100,24 @@ function isDemoRole(role: unknown): role is DemoRole {
     );
 }
 
+// text-base on mobile stops iOS from zooming in when an input is focused.
+// The dark: classes stop the shadcn Input's own dark background from
+// overriding this one.
+const inputBaseClassName =
+    "h-11 w-full min-w-0 rounded-xl border border-white/10 bg-slate-950/60 pl-10 text-base text-slate-100 backdrop-blur-sm transition-colors placeholder:text-slate-500 focus-visible:border-teal-400/80 focus-visible:ring-2 focus-visible:ring-teal-400/30 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm dark:border-white/10 dark:bg-slate-950/60 dark:disabled:bg-slate-950/60";
+
+const emailInputClassName = `${inputBaseClassName} pr-4`;
+
+// [&::-ms-reveal]:hidden removes Edge's built-in reveal icon (we have our own)
+const passwordInputClassName = `${inputBaseClassName} pr-12 [&::-ms-reveal]:hidden`;
+
+const labelClassName =
+    "text-xs font-semibold uppercase tracking-wider text-slate-300";
+
+// Same look as the custom Google button in GoogleLoginButton.tsx
+const demoButtonClassName =
+    "h-auto min-h-11 w-full min-w-0 justify-center gap-2 whitespace-normal break-words rounded-xl border-white/10 bg-slate-950/40 px-2 py-3 text-sm font-medium text-slate-200 hover:border-teal-400/40 hover:bg-teal-400/10 hover:text-teal-200 disabled:opacity-50 dark:border-white/10 dark:bg-slate-950/40 dark:hover:border-teal-400/40 dark:hover:bg-teal-400/10";
+
 export default function LoginForm() {
     const searchParams = useSearchParams();
 
@@ -116,8 +134,7 @@ export default function LoginForm() {
     });
 
     const isBusy =
-        form.formState.isSubmitting ||
-        demoRoleLoading !== null;
+        form.formState.isSubmitting || demoRoleLoading !== null;
 
     async function signIn(values: LoginValues) {
         try {
@@ -150,10 +167,6 @@ export default function LoginForm() {
         }
     }
 
-    async function onSubmit(values: LoginValues) {
-        await signIn(values);
-    }
-
     async function handleDemoLogin(account: DemoAccount) {
         if (isBusy) return;
 
@@ -169,20 +182,13 @@ export default function LoginForm() {
         }
     }
 
-    const inputClassName =
-        "h-11 w-full min-w-0 rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 backdrop-blur-sm transition-colors focus-visible:border-teal-400/80 focus-visible:ring-2 focus-visible:ring-teal-400/30 disabled:cursor-not-allowed disabled:opacity-60";
-
-    const labelClassName =
-        "text-xs font-semibold uppercase tracking-wider text-slate-300";
-
     return (
-        <div className="w-full min-w-0 space-y-6">
+        <div className="w-full min-w-0 space-y-6 scheme-dark">
             <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(signIn)}
                 noValidate
                 className="min-w-0 space-y-5"
             >
-                {/* Email */}
                 <div className="min-w-0 space-y-2">
                     <Label htmlFor="email" className={labelClassName}>
                         Email
@@ -208,29 +214,28 @@ export default function LoginForm() {
                             )}
                             aria-describedby={
                                 form.formState.errors.email
-                                    ? "email-error"
+                                    ? "login-email-error"
                                     : undefined
                             }
                             {...form.register("email")}
-                            className={inputClassName}
+                            className={emailInputClassName}
                         />
                     </div>
 
                     {form.formState.errors.email && (
                         <p
-                            id="email-error"
+                            id="login-email-error"
                             role="alert"
-                            className="flex min-w-0 items-start gap-1.5 break-words text-xs font-medium leading-5 text-rose-400"
+                            className="flex items-start gap-1.5 break-words text-xs font-medium leading-5 text-rose-400"
                         >
                             <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
-                            <span className="min-w-0">
+                            <span>
                                 {form.formState.errors.email.message}
                             </span>
                         </p>
                     )}
                 </div>
 
-                {/* Password */}
                 <div className="min-w-0 space-y-2">
                     <Label htmlFor="password" className={labelClassName}>
                         Password
@@ -253,11 +258,11 @@ export default function LoginForm() {
                             )}
                             aria-describedby={
                                 form.formState.errors.password
-                                    ? "password-error"
+                                    ? "login-password-error"
                                     : undefined
                             }
                             {...form.register("password")}
-                            className={`${inputClassName} pr-12`}
+                            className={passwordInputClassName}
                         />
 
                         <button
@@ -272,7 +277,7 @@ export default function LoginForm() {
                             }
                             aria-pressed={showPassword}
                             disabled={isBusy}
-                            className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 disabled:opacity-50"
                         >
                             {showPassword ? (
                                 <EyeOff
@@ -290,29 +295,28 @@ export default function LoginForm() {
 
                     {form.formState.errors.password && (
                         <p
-                            id="password-error"
+                            id="login-password-error"
                             role="alert"
-                            className="flex min-w-0 items-start gap-1.5 break-words text-xs font-medium leading-5 text-rose-400"
+                            className="flex items-start gap-1.5 break-words text-xs font-medium leading-5 text-rose-400"
                         >
                             <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
-                            <span className="min-w-0">
+                            <span>
                                 {form.formState.errors.password.message}
                             </span>
                         </p>
                     )}
                 </div>
 
-                {/* Standard sign-in */}
                 <Button
                     type="submit"
                     disabled={isBusy}
-                    className="min-h-11 w-full min-w-0 whitespace-normal rounded-xl bg-teal-400 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-teal-500/20 transition-colors hover:bg-teal-300 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transform-none motion-reduce:transition-none"
+                    className="min-h-11 w-full rounded-xl bg-teal-400 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-teal-500/20 transition-colors hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {form.formState.isSubmitting ? (
                         <span className="flex items-center justify-center gap-2">
                             <Loader2
                                 aria-hidden="true"
-                                className="size-4 shrink-0 animate-spin motion-reduce:animate-none"
+                                className="size-4 animate-spin"
                             />
                             Signing in...
                         </span>
@@ -322,10 +326,10 @@ export default function LoginForm() {
                 </Button>
             </form>
 
-            {/* Demo accounts */}
+            {/* @container: the grid below reacts to this section's width, not the screen's */}
             <section
                 aria-labelledby="demo-login-heading"
-                className="min-w-0 space-y-3"
+                className="@container min-w-0 space-y-3"
             >
                 <div className="space-y-1 text-center">
                     <h2
@@ -339,7 +343,7 @@ export default function LoginForm() {
                     </p>
                 </div>
 
-                <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid min-w-0 grid-cols-1 gap-2 @sm:grid-cols-3">
                     {DEMO_ACCOUNTS.map((account) => {
                         const Icon = account.icon;
                         const isLoading =
@@ -353,12 +357,12 @@ export default function LoginForm() {
                                 disabled={isBusy}
                                 onClick={() => handleDemoLogin(account)}
                                 aria-label={`Sign in with demo ${account.label} account`}
-                                className="h-auto min-h-11 w-full min-w-0 justify-center gap-2 whitespace-normal break-words rounded-xl border-white/10 bg-slate-950/40 px-3 py-3 text-sm font-medium text-slate-200 transition-colors hover:border-teal-400/40 hover:bg-teal-400/10 hover:text-teal-200 focus-visible:ring-2 focus-visible:ring-teal-400 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                                className={demoButtonClassName}
                             >
                                 {isLoading ? (
                                     <Loader2
                                         aria-hidden="true"
-                                        className="size-4 shrink-0 animate-spin motion-reduce:animate-none"
+                                        className="size-4 shrink-0 animate-spin"
                                     />
                                 ) : (
                                     <Icon
@@ -367,29 +371,26 @@ export default function LoginForm() {
                                     />
                                 )}
 
-                                <span className="min-w-0">
-                                    {isLoading
-                                        ? "Signing in..."
-                                        : `Demo ${account.label}`}
-                                </span>
+                                <span>{account.label}</span>
                             </Button>
                         );
                     })}
                 </div>
             </section>
 
-            {/* Google sign-in */}
-            <div className="min-w-0 space-y-5">
-                <div className="relative flex items-center justify-center">
-                    <div className="w-full border-t border-white/10" />
-                    <span className="absolute whitespace-nowrap bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div className="min-w-0 space-y-4">
+                {/* Lines on both sides of the text: no background color to match */}
+                <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-white/10" />
+
+                    <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Or continue with
                     </span>
+
+                    <div className="h-px flex-1 bg-white/10" />
                 </div>
 
-                <div className="min-w-0">
-                    <GoogleLoginButton />
-                </div>
+                <GoogleLoginButton />
             </div>
         </div>
     );
