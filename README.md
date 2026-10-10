@@ -8,8 +8,8 @@ Servexa connects customers with field technicians through a role-based workflow 
 
 ## 🌐 Live Application
 
-- **Frontend:** https://servexa-frontend.vercel.app/
-- **Backend API:** https://servexa-backend.vercel.app/
+- **Frontend:** https://servexa-frontend.vercel.app
+- **Backend API:** https://servexa-backend.vercel.app
 
 ### Local Backend
 
@@ -1641,3 +1641,7 @@ frontend modification for changing status of work order.
 In production, need to check backing after redirection after login
 
 Better to show clear error toasts in production...
+
+Need to doubt the Google login button in production.
+
+Need to check about GoogleLoginButton and label component. Demo video.

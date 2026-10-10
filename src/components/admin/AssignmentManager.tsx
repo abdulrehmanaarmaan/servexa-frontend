@@ -26,11 +26,8 @@ export default function AssignmentManager({
   workOrderId,
 }: AssignmentManagerProps) {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [technicians, setTechnicians] = useState<
-    AdminTechnician[]
-  >([]);
-  const [selectedTechnicianId, setSelectedTechnicianId] =
-    useState("");
+  const [technicians, setTechnicians] = useState<AdminTechnician[]>([]);
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -42,13 +39,10 @@ export default function AssignmentManager({
       try {
         setIsLoading(true);
 
-        const [assignmentData, technicianData] =
-          await Promise.all([
-            getAssignments(workOrderId),
-            apiFetch<AdminTechnician[]>(
-              endpoints.admin.technicians,
-            ),
-          ]);
+        const [assignmentData, technicianData] = await Promise.all([
+          getAssignments(workOrderId),
+          apiFetch<AdminTechnician[]>(endpoints.admin.technicians),
+        ]);
 
         setAssignments(assignmentData);
         setTechnicians(technicianData);
@@ -91,21 +85,12 @@ export default function AssignmentManager({
         technicianId: selectedTechnicianId,
       };
 
-      const assignment = await createAssignment(
-        workOrderId,
-        payload,
-      );
+      const assignment = await createAssignment(workOrderId, payload);
 
-      setAssignments((current) => [
-        ...current,
-        assignment,
-      ]);
-
+      setAssignments((current) => [...current, assignment]);
       setSelectedTechnicianId("");
 
-      toast.success(
-        "Technician assigned successfully.",
-      );
+      toast.success("Technician assigned successfully.");
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -117,27 +102,17 @@ export default function AssignmentManager({
     }
   };
 
-  const handleUnassign = async (
-    assignmentId: string,
-  ) => {
+  const handleUnassign = async (assignmentId: string) => {
     try {
       setRemovingAssignmentId(assignmentId);
 
-      await unassignTechnician(
-        workOrderId,
-        assignmentId,
-      );
+      await unassignTechnician(workOrderId, assignmentId);
 
       setAssignments((current) =>
-        current.filter(
-          (assignment) =>
-            assignment.id !== assignmentId,
-        ),
+        current.filter((assignment) => assignment.id !== assignmentId),
       );
 
-      toast.success(
-        "Technician unassigned successfully.",
-      );
+      toast.success("Technician unassigned successfully.");
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -149,9 +124,7 @@ export default function AssignmentManager({
     }
   };
 
-  const getTechnicianName = (
-    technicianId: string,
-  ) => {
+  const getTechnicianName = (technicianId: string) => {
     const technician = technicians.find(
       (item) => item.id === technicianId,
     );
@@ -168,24 +141,25 @@ export default function AssignmentManager({
     );
   };
 
-  const availableTechnicians =
-    technicians.filter(
-      (technician) =>
-        !assignments.some(
-          (assignment) =>
-            assignment.technicianId === technician.id,
-        ),
-    );
+  const availableTechnicians = technicians.filter(
+    (technician) =>
+      !assignments.some(
+        (assignment) =>
+          assignment.technicianId === technician.id,
+      ),
+  );
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 2 }).map((_, index) => (
-          <div
-            key={`assignment-skeleton-${index}`}
-            className="h-32 animate-pulse rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl"
-          />
-        ))}
+        {["assignment-skeleton-primary", "assignment-skeleton-secondary"].map(
+          (skeletonKey) => (
+            <div
+              key={skeletonKey}
+              className="h-32 animate-pulse rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl"
+            />
+          ),
+        )}
       </div>
     );
   }
@@ -200,8 +174,7 @@ export default function AssignmentManager({
           </h2>
 
           <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-            Select a technician to assign to this work
-            order.
+            Select a technician to assign to this work order.
           </p>
         </div>
 
@@ -209,13 +182,10 @@ export default function AssignmentManager({
           <select
             value={selectedTechnicianId}
             onChange={(event) =>
-              setSelectedTechnicianId(
-                event.target.value,
-              )
+              setSelectedTechnicianId(event.target.value)
             }
             disabled={
-              isAssigning ||
-              availableTechnicians.length === 0
+              isAssigning || availableTechnicians.length === 0
             }
             className="h-10 flex-1 rounded-xl border border-white/10 bg-slate-950 px-3 text-xs text-white outline-none transition focus:border-teal-400 focus:ring-1 focus:ring-teal-400/20 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
           >
@@ -225,28 +195,20 @@ export default function AssignmentManager({
                 : "Select a technician"}
             </option>
 
-            {availableTechnicians.map(
-              (technician) => (
-                <option
-                  key={technician.id}
-                  value={technician.id}
-                >
-                  {technician.name ||
-                    technician.user?.email ||
-                    technician.employeeCode ||
-                    technician.id}
-                </option>
-              ),
-            )}
+            {availableTechnicians.map((technician) => (
+              <option key={technician.id} value={technician.id}>
+                {technician.name ||
+                  technician.user?.email ||
+                  technician.employeeCode ||
+                  technician.id}
+              </option>
+            ))}
           </select>
 
           <button
             type="button"
             onClick={handleAssign}
-            disabled={
-              isAssigning ||
-              !selectedTechnicianId
-            }
+            disabled={isAssigning || !selectedTechnicianId}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-teal-400 px-5 text-xs font-bold text-slate-950 shadow-md shadow-teal-500/10 transition-all hover:bg-teal-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
           >
             {isAssigning ? (
@@ -272,8 +234,7 @@ export default function AssignmentManager({
           </h2>
 
           <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-            Technicians currently assigned to this
-            work order.
+            Technicians currently assigned to this work order.
           </p>
         </div>
 
@@ -284,8 +245,7 @@ export default function AssignmentManager({
             </div>
 
             <p className="mt-3 text-xs font-medium text-slate-400 sm:text-sm">
-              No technicians are currently assigned to
-              this work order.
+              No technicians are currently assigned to this work order.
             </p>
           </div>
         ) : (
@@ -301,9 +261,7 @@ export default function AssignmentManager({
                   </p>
 
                   <p className="mt-1 truncate text-sm font-bold text-slate-200">
-                    {getTechnicianName(
-                      assignment.technicianId,
-                    )}
+                    {getTechnicianName(assignment.technicianId)}
                   </p>
 
                   <p className="mt-1 break-all font-mono text-xs text-slate-500">
@@ -313,17 +271,11 @@ export default function AssignmentManager({
 
                 <button
                   type="button"
-                  onClick={() =>
-                    handleUnassign(assignment.id)
-                  }
-                  disabled={
-                    removingAssignmentId ===
-                    assignment.id
-                  }
+                  onClick={() => handleUnassign(assignment.id)}
+                  disabled={removingAssignmentId === assignment.id}
                   className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-xs font-bold text-rose-300 transition-all hover:bg-rose-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {removingAssignmentId ===
-                  assignment.id ? (
+                  {removingAssignmentId === assignment.id ? (
                     <>
                       <Loader2 className="size-3.5 animate-spin" />
                       Removing...

@@ -8,6 +8,14 @@ interface TechnicianNotificationsClientProps {
     initialData: NotificationListResponse;
 }
 
+const SKELETON_ITEMS = [
+    "notification-skeleton-1",
+    "notification-skeleton-2",
+    "notification-skeleton-3",
+    "notification-skeleton-4",
+    "notification-skeleton-5",
+];
+
 export default function TechnicianNotificationsClient({
     initialData,
 }: TechnicianNotificationsClientProps) {
@@ -29,9 +37,9 @@ export default function TechnicianNotificationsClient({
                 </div>
 
                 <div className="space-y-3">
-                    {Array.from({ length: 5 }).map((_, index) => (
+                    {SKELETON_ITEMS.map((skeletonId) => (
                         <div
-                            key={index}
+                            key={skeletonId}
                             className="h-28 animate-pulse rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl"
                         />
                     ))}
@@ -61,10 +69,14 @@ export default function TechnicianNotificationsClient({
                 </div>
 
                 <div className="flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-950/40 p-6 text-xs text-red-200 backdrop-blur-xl">
-                    <AlertCircle className="size-5 shrink-0 text-red-400 mt-0.5" />
+                    <AlertCircle className="mt-0.5 size-5 shrink-0 text-red-400" />
                     <div className="space-y-1">
-                        <p className="font-bold text-red-300">Failed to load notifications</p>
-                        <p className="text-red-300/80">Please check your network connection and try again.</p>
+                        <p className="font-bold text-red-300">
+                            Failed to load notifications
+                        </p>
+                        <p className="text-red-300/80">
+                            Please check your network connection and try again.
+                        </p>
                     </div>
                 </div>
             </section>
@@ -104,7 +116,7 @@ export default function TechnicianNotificationsClient({
                         markAllAsReadMutation.isPending ||
                         !hasUnreadNotifications
                     }
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-slate-950 px-5 text-xs font-semibold text-slate-200 transition-all hover:bg-slate-800 hover:text-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 shadow-lg shadow-black/20"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-slate-950 px-5 text-xs font-semibold text-slate-200 shadow-lg shadow-black/20 transition-all hover:bg-slate-800 hover:text-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     <CheckCheck className="size-4 text-teal-400" />
                     {markAllAsReadMutation.isPending
@@ -116,7 +128,7 @@ export default function TechnicianNotificationsClient({
             {notifications.length === 0 ? (
                 <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-2xl backdrop-blur-xl">
                     <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-                        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/80 text-slate-400 ring-1 ring-white/10 shadow-inner">
+                        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/80 text-slate-400 shadow-inner ring-1 ring-white/10">
                             <Bell className="size-6 text-teal-400" />
                         </div>
 
@@ -149,33 +161,30 @@ export default function TechnicianNotificationsClient({
                                 notification.isRead ||
                                 markAsReadMutation.isPending
                             }
-                            className={`w-full rounded-2xl border p-5 text-left transition-all backdrop-blur-xl ${
+                            className={`w-full rounded-2xl border p-5 text-left backdrop-blur-xl transition-all ${
                                 notification.isRead
                                     ? "border-white/10 bg-slate-900/40 opacity-75 hover:bg-slate-900/60"
-                                    : "border-white/15 bg-slate-900/90 shadow-xl hover:bg-slate-900 hover:border-teal-400/40"
+                                    : "border-white/15 bg-slate-900/90 shadow-xl hover:border-teal-400/40 hover:bg-slate-900"
                             }`}
                         >
                             <div className="flex items-start justify-between gap-4">
                                 <div className="min-w-0">
-                                    <h2 className="font-bold text-white text-sm sm:text-base">
+                                    <h2 className="text-sm font-bold text-white sm:text-base">
                                         {notification.title}
                                     </h2>
 
-                                    <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-300">
+                                    <p className="mt-1.5 text-xs leading-relaxed text-slate-300 sm:text-sm">
                                         {notification.message}
                                     </p>
 
                                     <p className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-slate-950/60 px-2.5 py-1 font-mono text-[10px] font-semibold tracking-wider text-teal-400 uppercase">
                                         <span className="size-1.5 rounded-full bg-teal-400" />
-                                        {notification.type.replace(
-                                            /_/g,
-                                            " ",
-                                        )}
+                                        {notification.type.replace(/_/g, " ")}
                                     </p>
                                 </div>
 
                                 {!notification.isRead && (
-                                    <span className="mt-1 size-2.5 shrink-0 rounded-full bg-teal-400 ring-4 ring-teal-400/20 animate-pulse" />
+                                    <span className="mt-1 size-2.5 shrink-0 animate-pulse rounded-full bg-teal-400 ring-4 ring-teal-400/20" />
                                 )}
                             </div>
                         </button>

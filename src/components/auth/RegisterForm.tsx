@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import type { z } from "zod";
 import {
   AlertCircle,
   Eye,
@@ -23,18 +22,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { registerSchema } from "@/lib/validation";
+import {
+  RegisterFormInput,
+  RegisterFormValues,
+  registerSchema,
+} from "@/lib/validation";
 import { GoogleLoginButton } from "./GoogleLoginButton";
-
-type Values = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
   const router = useRouter();
-const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const form = useForm<Values>({
+  const form = useForm<RegisterFormInput, undefined, RegisterFormValues>({
     resolver: zodResolver(registerSchema),
 
     defaultValues: {
@@ -45,49 +46,35 @@ const searchParams = useSearchParams();
     },
   });
 
-  async function onSubmit(values: Values) {
+  async function onSubmit(values: RegisterFormValues) {
     try {
-        await authService.register(values);
+      await authService.register(values);
 
-        toast.success(
-            "Account created. Please sign in.",
+      toast.success("Account created successfully.");
+
+      const callbackUrl = searchParams.get("callbackUrl");
+
+      if (
+        callbackUrl &&
+        callbackUrl.startsWith("/") &&
+        !callbackUrl.startsWith("//")
+      ) {
+        router.replace(
+          `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`,
         );
-
-        const callbackUrl =
-            searchParams.get(
-                "callbackUrl",
-            );
-
-        if (
-            callbackUrl &&
-            callbackUrl.startsWith("/") &&
-            !callbackUrl.startsWith("//")
-        ) {
-            router.replace(
-                `/auth/login?callbackUrl=${encodeURIComponent(
-                    callbackUrl,
-                )}`,
-            );
-        } else {
-            router.replace(
-                "/auth/login",
-            );
-        }
+      } else {
+        router.replace("/auth/login");
+      }
     } catch (error) {
-        toast.error(
-            error instanceof Error
-                ? error.message
-                : "Registration failed.",
-        );
+      toast.error(
+        error instanceof Error ? error.message : "Registration failed.",
+      );
     }
-}
+  }
 
   return (
     <div className="space-y-6">
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-5"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         {/* Name Field */}
         <div className="space-y-2">
           <Label
@@ -208,9 +195,7 @@ const searchParams = useSearchParams();
             <button
               type="button"
               onClick={() => setShowPassword((previous) => !previous)}
-              aria-label={
-                showPassword ? "Hide password" : "Show password"
-              }
+              aria-label={showPassword ? "Hide password" : "Show password"}
               className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition-colors hover:text-slate-200"
             >
               {showPassword ? (

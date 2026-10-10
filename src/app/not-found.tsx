@@ -14,7 +14,7 @@ export default function NotFound() {
         {/* Ambient glows */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 opacity-25 blur-[120px] [background:radial-gradient(circle_at_50%_50%,#2dd4bf_0%,transparent_70%)]"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-100px] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 opacity-25 blur-[120px] [background:radial-gradient(circle_at_50%_50%,#2dd4bf_0%,transparent_70%)]"
         />
 
         <div

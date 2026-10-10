@@ -26,6 +26,13 @@ import type {
   CreateAddressPayload,
 } from "@/types/address";
 
+const SKELETON_IDS = [
+  "address-skeleton-1",
+  "address-skeleton-2",
+  "address-skeleton-3",
+  "address-skeleton-4",
+];
+
 const addressFormSchema = z.object({
   label: z
     .string()
@@ -148,14 +155,12 @@ export default function AddressesClient() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {Array.from({ length: 4 }).map(
-            (_, index) => (
-              <div
-                key={index}
-                className="h-40 w-full animate-pulse rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl"
-              />
-            ),
-          )}
+          {SKELETON_IDS.map((id) => (
+            <div
+              key={id}
+              className="h-40 w-full animate-pulse rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl"
+            />
+          ))}
         </div>
       </section>
     );
@@ -181,10 +186,13 @@ export default function AddressesClient() {
           </p>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-red-500/30 bg-red-950/40 p-6 text-red-200 shadow-2xl backdrop-blur-xl sm:p-8">
-          <h1 className="font-bold text-sm sm:text-base text-white">
+        <div
+          role="alert"
+          className="relative overflow-hidden rounded-2xl border border-red-500/30 bg-red-950/40 p-6 text-red-200 shadow-2xl backdrop-blur-xl sm:p-8"
+        >
+          <h2 className="font-bold text-sm sm:text-base text-white">
             Failed to load addresses
-          </h1>
+          </h2>
 
           <p className="mt-1 text-xs sm:text-sm text-red-300">
             {error instanceof Error
@@ -276,7 +284,9 @@ export default function AddressesClient() {
                 )
               }
               isDeleting={
-                deleteMutation.isPending
+                deleteMutation.isPending &&
+                deleteMutation.variables ===
+                  address.id
               }
             />
           ))}

@@ -126,90 +126,72 @@ export default function AdminTechniciansClient({
                             </thead>
 
                             <tbody className="divide-y divide-white/10">
-                                {technicians.map(
-                                    (technician) => (
-                                        <tr
-                                            key={
-                                                technician.id
-                                            }
-                                            className="transition-colors hover:bg-white/5"
-                                        >
-                                            <td className="px-5 py-4 font-bold text-white">
-                                                {technician.name ||
-                                                    "—"}
-                                            </td>
+                                {technicians.map((technician) => (
+                                    <tr
+                                        key={technician.id}
+                                        className="transition-colors hover:bg-white/5"
+                                    >
+                                        <td className="px-5 py-4 font-bold text-white">
+                                            {technician.name || "—"}
+                                        </td>
 
-                                            <td className="px-5 py-4 text-slate-300">
-                                                {technician.user
-                                                    ?.email ||
-                                                    "—"}
-                                            </td>
+                                        <td className="px-5 py-4 text-slate-300">
+                                            {technician.user?.email || "—"}
+                                        </td>
 
-                                            <td className="px-5 py-4 text-slate-300">
-                                                {technician.phone ||
-                                                    "—"}
-                                            </td>
+                                        <td className="px-5 py-4 text-slate-300">
+                                            {technician.phone || "—"}
+                                        </td>
 
-                                            <td className="px-5 py-4 font-mono text-slate-300">
-                                                {technician.employeeCode ||
-                                                    "—"}
-                                            </td>
+                                        <td className="px-5 py-4 font-mono text-slate-300">
+                                            {technician.employeeCode || "—"}
+                                        </td>
 
-                                            <td className="px-5 py-4">
-                                                <StatusBadge
-                                                    isActive={
-                                                        technician.isActive
-                                                    }
-                                                />
-                                            </td>
+                                        <td className="px-5 py-4">
+                                            <StatusBadge
+                                                isActive={technician.isActive}
+                                            />
+                                        </td>
 
-                                            <td className="px-5 py-4">
-                                                <select
-                                                    value={
-                                                        technician.isActive
-                                                            ? "ACTIVE"
-                                                            : "INACTIVE"
-                                                    }
-                                                    disabled={
-                                                        statusMutation.isPending
-                                                    }
-                                                    onChange={(
-                                                        event,
-                                                    ) => {
-                                                        const isActive =
-                                                            event
-                                                                .target
-                                                                .value ===
-                                                            "ACTIVE";
+                                        <td className="px-5 py-4">
+                                            <select
+                                                aria-label={`Status for ${technician.name || technician.user?.email || technician.id}`}
+                                                value={
+                                                    technician.isActive
+                                                        ? "ACTIVE"
+                                                        : "INACTIVE"
+                                                }
+                                                disabled={statusMutation.isPending}
+                                                onChange={(event) => {
+                                                    const isActive =
+                                                        event.target.value ===
+                                                        "ACTIVE";
 
-                                                        statusMutation.mutate(
-                                                            {
-                                                                technicianId:
-                                                                    technician.id,
-                                                                isActive,
-                                                            },
-                                                        );
-                                                    }}
-                                                    className="h-9 rounded-xl border border-white/10 bg-slate-950 px-3 py-1.5 text-xs font-medium text-white outline-none transition focus:border-teal-400 focus:ring-1 focus:ring-teal-400/20 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                                                    statusMutation.mutate({
+                                                        technicianId:
+                                                            technician.id,
+                                                        isActive,
+                                                    });
+                                                }}
+                                                className="h-9 rounded-xl border border-white/10 bg-slate-950 px-3 py-1.5 text-xs font-medium text-white outline-none transition focus:border-teal-400 focus:ring-1 focus:ring-teal-400/20 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                                            >
+                                                <option
+                                                    value="ACTIVE"
+                                                    className="bg-slate-950 text-white"
                                                 >
-                                                    <option
-                                                        value="ACTIVE"
-                                                        className="bg-slate-950 text-white"
-                                                    >
-                                                        Active
-                                                    </option>
+                                                    Active
+                                                </option>
 
-                                                    <option
-                                                        value="INACTIVE"
-                                                        className="bg-slate-950 text-white"
-                                                    >
-                                                        Inactive
-                                                    </option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                    ),
-                                )}
+                                                <option
+                                                    value="INACTIVE"
+                                                    className="bg-slate-950 text-white"
+                                                >
+                                                    Inactive
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -235,8 +217,7 @@ function PageHeader() {
             </h1>
 
             <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
-                Manage Servexa technicians and their
-                account status.
+                Manage Servexa technicians and their account status.
             </p>
         </div>
     );
@@ -291,6 +272,23 @@ function Empty({
 }
 
 function TechniciansSkeleton() {
+    const skeletonRows = [
+        "name",
+        "email",
+        "phone",
+        "employee-code",
+        "status",
+    ];
+
+    const skeletonColumns = [
+        "column-1",
+        "column-2",
+        "column-3",
+        "column-4",
+        "column-5",
+        "column-6",
+    ];
+
     return (
         <section className="space-y-6 text-slate-100">
             <div>
@@ -304,25 +302,19 @@ function TechniciansSkeleton() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-2xl backdrop-blur-xl">
                 <div className="h-12 animate-pulse border-b border-white/10 bg-slate-950/60" />
 
-                {Array.from({ length: 5 }).map(
-                    (_, index) => (
-                        <div
-                            key={`technician-skeleton-${index}`}
-                            className="grid grid-cols-6 gap-4 border-b border-white/5 p-5 last:border-b-0"
-                        >
-                            {Array.from({
-                                length: 6,
-                            }).map(
-                                (_, cellIndex) => (
-                                    <div
-                                        key={`cell-skeleton-${cellIndex}`}
-                                        className="h-5 animate-pulse rounded-lg bg-slate-800/80"
-                                    />
-                                ),
-                            )}
-                        </div>
-                    ),
-                )}
+                {skeletonRows.map((row) => (
+                    <div
+                        key={`technician-skeleton-${row}`}
+                        className="grid grid-cols-6 gap-4 border-b border-white/5 p-5 last:border-b-0"
+                    >
+                        {skeletonColumns.map((column) => (
+                            <div
+                                key={`technician-skeleton-${row}-${column}`}
+                                className="h-5 animate-pulse rounded-lg bg-slate-800/80"
+                            />
+                        ))}
+                    </div>
+                ))}
             </div>
         </section>
     );
