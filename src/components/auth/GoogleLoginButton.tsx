@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authService } from "@/services/auth.service";
 
@@ -37,6 +37,8 @@ interface GoogleWindow extends Window {
 
 const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 
+let googleScriptPromise: Promise<void> | null = null;
+
 function getSafeCallbackUrl(callbackUrl: string | null): string | null {
   if (
     !callbackUrl ||
@@ -50,25 +52,20 @@ function getSafeCallbackUrl(callbackUrl: string | null): string | null {
 }
 
 function loadGoogleScript(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const googleWindow = window as GoogleWindow;
+  const googleWindow = window as GoogleWindow;
 
-    if (googleWindow.google?.accounts?.id) {
-      resolve();
-      return;
-    }
+  if (googleWindow.google?.accounts?.id) {
+    return Promise.resolve();
+  }
 
+  if (googleScriptPromise) {
+    return googleScriptPromise;
+  }
+
+  googleScriptPromise = new Promise<void>((resolve, reject) => {
     let script = document.querySelector<HTMLScriptElement>(
       `script[src="${GOOGLE_SCRIPT_SRC}"]`,
     );
-
-    if (!script) {
-      script = document.createElement("script");
-      script.src = GOOGLE_SCRIPT_SRC;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
 
     const handleLoad = () => {
       cleanup();
@@ -76,12 +73,14 @@ function loadGoogleScript(): Promise<void> {
       if (googleWindow.google?.accounts?.id) {
         resolve();
       } else {
+        googleScriptPromise = null;
         reject(new Error("Google Identity Services failed to initialize."));
       }
     };
 
     const handleError = () => {
       cleanup();
+      googleScriptPromise = null;
       reject(new Error("Failed to load Google sign-in."));
     };
 
@@ -90,131 +89,178 @@ function loadGoogleScript(): Promise<void> {
       script?.removeEventListener("error", handleError);
     };
 
-    script.addEventListener("load", handleLoad);
-    script.addEventListener("error", handleError);
+    if (!script) {
+      script = document.createElement("script");
+      script.src = GOOGLE_SCRIPT_SRC;
+      script.async = true;
+      script.defer = true;
+    }
 
-    // The script may have finished loading before listeners were added.
+    script.addEventListener("load", handleLoad, { once: true });
+    script.addEventListener("error", handleError, { once: true });
+
+    if (!script.isConnected) {
+      document.head.appendChild(script);
+    }
+
+    // Handle a script that became ready before the listeners were attached.
     if (googleWindow.google?.accounts?.id) {
       cleanup();
       resolve();
     }
   });
+
+  return googleScriptPromise;
 }
 
 export function GoogleLoginButton() {
   const buttonRef = useRef<HTMLDivElement>(null);
-
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  const callbackUrlParam = searchParams.get("callbackUrl");
+
+  const handleCredential = useCallback(
+    async (response: GoogleCredentialResponse) => {
+      if (!response.credential) {
+        setErrorMessage("Google did not return a valid credential.");
+        return;
+      }
+
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const { user } = await authService.googleLogin(response.credential);
+
+        const callbackUrl = getSafeCallbackUrl(callbackUrlParam);
+
+        if (callbackUrl) {
+          router.replace(callbackUrl);
+          return;
+        }
+
+        switch (user?.role) {
+          case "CUSTOMER":
+            router.replace("/dashboard/customer");
+            break;
+
+          case "TECHNICIAN":
+            router.replace("/dashboard/technician");
+            break;
+
+          case "ADMIN":
+            router.replace("/dashboard/admin");
+            break;
+
+          default:
+            setErrorMessage(
+              "Sign-in succeeded, but your account role could not be identified.",
+            );
+        }
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Google sign-in failed. Please try again.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [callbackUrlParam, router],
+  );
 
   useEffect(() => {
+    const container = buttonRef.current;
+
+    if (!container) {
+      return;
+    }
+
     let isMounted = true;
+    let resizeObserver: ResizeObserver | undefined;
+    let googleId: GoogleAccountsId | undefined;
+    let lastRenderedWidth = 0;
+
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+    if (!clientId) {
+      setErrorMessage("Google sign-in is not configured.");
+      return;
+    }
+
+    const renderResponsiveButton = () => {
+      if (!isMounted || !googleId || !container) {
+        return;
+      }
+
+      const containerWidth = Math.floor(
+        container.getBoundingClientRect().width,
+      );
+
+      if (containerWidth <= 0) {
+        return;
+      }
+
+      // Google Identity Services supports button widths up to 400px.
+      const width = Math.min(400, containerWidth);
+
+      if (width === lastRenderedWidth) {
+        return;
+      }
+
+      lastRenderedWidth = width;
+      container.replaceChildren();
+
+      googleId.renderButton(container, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        width,
+        text: "continue_with",
+        shape: "rectangular",
+        logo_alignment: "left",
+      });
+    };
 
     const initializeGoogle = async () => {
       try {
-        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-        if (!clientId) {
-          throw new Error("Google sign-in is not configured.");
-        }
-
         await loadGoogleScript();
 
-        if (!isMounted || !buttonRef.current) {
+        if (!isMounted) {
           return;
         }
 
         const googleWindow = window as GoogleWindow;
-        const googleId = googleWindow.google?.accounts.id;
+        googleId = googleWindow.google?.accounts.id;
 
         if (!googleId) {
           throw new Error("Google sign-in could not be initialized.");
         }
 
-        const container = buttonRef.current;
-        container.replaceChildren();
-
         googleId.initialize({
           client_id: clientId,
-
-          callback: async (response) => {
-            if (!response.credential || !isMounted) {
-              return;
-            }
-
-            setIsLoading(true);
-            setErrorMessage("");
-
-            try {
-              const { user } = await authService.googleLogin(
-                response.credential,
-              );
-
-              if (!isMounted) {
-                return;
-              }
-
-              const callbackUrl = getSafeCallbackUrl(
-                searchParams.get("callbackUrl"),
-              );
-
-              if (callbackUrl) {
-                router.replace(callbackUrl);
-                return;
-              }
-
-              switch (user?.role) {
-                case "CUSTOMER":
-                  router.replace("/dashboard/customer");
-                  break;
-
-                case "TECHNICIAN":
-                  router.replace("/dashboard/technician");
-                  break;
-
-                case "ADMIN":
-                  router.replace("/dashboard/admin");
-                  break;
-
-                default:
-                  setErrorMessage(
-                    "Sign-in succeeded, but your account role could not be identified.",
-                  );
-              }
-            } catch (error) {
-              if (isMounted) {
-                setErrorMessage(
-                  error instanceof Error
-                    ? error.message
-                    : "Google sign-in failed. Please try again.",
-                );
-              }
-            } finally {
-              if (isMounted) {
-                setIsLoading(false);
-              }
+          callback: (response) => {
+            if (isMounted) {
+              void handleCredential(response);
             }
           },
         });
 
-        // Google supports widths up to 400px.
-        const width = Math.min(
-          400,
-          Math.max(200, Math.floor(container.clientWidth)),
-        );
+        renderResponsiveButton();
 
-        googleId.renderButton(container, {
-          type: "standard",
-          theme: "outline",
-          size: "medium",
-          width,
-          text: "signin_with",
-          shape: "rectangular",
-          logo_alignment: "left",
-        });
+        if (typeof ResizeObserver !== "undefined") {
+          resizeObserver = new ResizeObserver(() => {
+            renderResponsiveButton();
+          });
+
+          resizeObserver.observe(container);
+        } else {
+          window.addEventListener("resize", renderResponsiveButton);
+        }
       } catch (error) {
         if (isMounted) {
           setErrorMessage(
@@ -230,29 +276,34 @@ export function GoogleLoginButton() {
 
     return () => {
       isMounted = false;
-      buttonRef.current?.replaceChildren();
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", renderResponsiveButton);
+      container.replaceChildren();
     };
-  }, [router, searchParams]);
+  }, [handleCredential]);
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
+      <span className="sr-only" id="google-login-label">
+        Continue with Google
+      </span>
+
       <div
         ref={buttonRef}
-        className="flex min-h-10 w-full justify-center overflow-hidden"
+        className="flex min-h-11 w-full min-w-0 justify-center overflow-hidden border-0 p-0"
       />
 
       {isLoading && (
-        // biome-ignore lint/a11y/useSemanticElements: <explanation>
-        <p
-          role="status"
-          className="mt-2.5 animate-pulse text-center text-xs font-medium text-slate-400"
-        >
+        <output className="mt-2.5 block animate-pulse text-center text-xs font-medium text-slate-400">
           Signing in with Google...
-        </p>
+        </output>
       )}
 
       {errorMessage && (
-        <p role="alert" className="mt-2 text-center text-sm text-red-400">
+        <p
+          role="alert"
+          className="mt-2 break-words text-center text-sm leading-5 text-rose-400"
+        >
           {errorMessage}
         </p>
       )}

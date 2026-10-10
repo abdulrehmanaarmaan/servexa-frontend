@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +26,6 @@ import { loginSchema } from "@/lib/validation";
 import { GoogleLoginButton } from "./GoogleLoginButton";
 
 type LoginValues = z.infer<typeof loginSchema>;
-
 type DemoRole = "CUSTOMER" | "TECHNICIAN" | "ADMIN";
 
 interface DemoAccount {
@@ -138,11 +136,9 @@ export default function LoginForm() {
                 searchParams.get("callbackUrl"),
             );
 
-            const destination =
-                callbackUrl ?? ROLE_DASHBOARDS[user.role];
-
-            // A full navigation also refreshes server-side auth state.
-            window.location.replace(destination);
+            window.location.replace(
+                callbackUrl ?? ROLE_DASHBOARDS[user.role],
+            );
         } catch (error) {
             console.error("LOGIN ERROR:", error);
 
@@ -168,47 +164,66 @@ export default function LoginForm() {
                 email: account.email,
                 password: account.password,
             });
-            
         } finally {
             setDemoRoleLoading(null);
         }
     }
 
+    const inputClassName =
+        "h-11 w-full min-w-0 rounded-xl border border-white/10 bg-slate-950/60 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 backdrop-blur-sm transition-colors focus-visible:border-teal-400/80 focus-visible:ring-2 focus-visible:ring-teal-400/30 disabled:cursor-not-allowed disabled:opacity-60";
+
+    const labelClassName =
+        "text-xs font-semibold uppercase tracking-wider text-slate-300";
+
     return (
-        <div className="space-y-6">
+        <div className="w-full min-w-0 space-y-6">
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-5"
+                noValidate
+                className="min-w-0 space-y-5"
             >
                 {/* Email */}
-                <div className="space-y-2">
-                    <Label
-                        htmlFor="email"
-                        className="text-xs font-semibold uppercase tracking-wider text-slate-300"
-                    >
+                <div className="min-w-0 space-y-2">
+                    <Label htmlFor="email" className={labelClassName}>
                         Email
                     </Label>
 
-                    <div className="relative rounded-xl transition-all focus-within:ring-2 focus-within:ring-teal-400/50">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                            <Mail className="size-4" />
-                        </div>
+                    <div className="relative min-w-0">
+                        <Mail
+                            aria-hidden="true"
+                            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                        />
 
                         <Input
                             id="email"
                             type="email"
                             autoComplete="email"
+                            inputMode="email"
+                            autoCapitalize="none"
+                            spellCheck={false}
                             placeholder="name@company.com"
                             disabled={isBusy}
+                            aria-invalid={Boolean(
+                                form.formState.errors.email,
+                            )}
+                            aria-describedby={
+                                form.formState.errors.email
+                                    ? "email-error"
+                                    : undefined
+                            }
                             {...form.register("email")}
-                            className="w-full rounded-xl border border-white/10 bg-slate-950/60 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:bg-slate-950/80 focus:outline-none focus:ring-0"
+                            className={inputClassName}
                         />
                     </div>
 
                     {form.formState.errors.email && (
-                        <p className="flex items-center gap-1.5 text-xs font-medium text-rose-400">
-                            <AlertCircle className="size-3.5 shrink-0" />
-                            <span>
+                        <p
+                            id="email-error"
+                            role="alert"
+                            className="flex min-w-0 items-start gap-1.5 break-words text-xs font-medium leading-5 text-rose-400"
+                        >
+                            <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+                            <span className="min-w-0">
                                 {form.formState.errors.email.message}
                             </span>
                         </p>
@@ -216,27 +231,33 @@ export default function LoginForm() {
                 </div>
 
                 {/* Password */}
-                <div className="space-y-2">
-                    <Label
-                        htmlFor="password"
-                        className="text-xs font-semibold uppercase tracking-wider text-slate-300"
-                    >
+                <div className="min-w-0 space-y-2">
+                    <Label htmlFor="password" className={labelClassName}>
                         Password
                     </Label>
 
-                    <div className="relative rounded-xl transition-all focus-within:ring-2 focus-within:ring-teal-400/50">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                            <Lock className="size-4" />
-                        </div>
+                    <div className="relative min-w-0">
+                        <Lock
+                            aria-hidden="true"
+                            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+                        />
 
                         <Input
                             id="password"
                             type={showPassword ? "text" : "password"}
                             autoComplete="current-password"
-                            placeholder="••••••••"
+                            placeholder="Enter your password"
                             disabled={isBusy}
+                            aria-invalid={Boolean(
+                                form.formState.errors.password,
+                            )}
+                            aria-describedby={
+                                form.formState.errors.password
+                                    ? "password-error"
+                                    : undefined
+                            }
                             {...form.register("password")}
-                            className="w-full rounded-xl border border-white/10 bg-slate-950/60 py-2.5 pl-10 pr-11 text-sm text-slate-100 placeholder:text-slate-500 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:bg-slate-950/80 focus:outline-none focus:ring-0"
+                            className={`${inputClassName} pr-12`}
                         />
 
                         <button
@@ -251,20 +272,30 @@ export default function LoginForm() {
                             }
                             aria-pressed={showPassword}
                             disabled={isBusy}
-                            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition-colors hover:text-slate-200 disabled:opacity-50"
+                            className="absolute right-1 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {showPassword ? (
-                                <EyeOff className="size-4" />
+                                <EyeOff
+                                    aria-hidden="true"
+                                    className="size-4"
+                                />
                             ) : (
-                                <Eye className="size-4" />
+                                <Eye
+                                    aria-hidden="true"
+                                    className="size-4"
+                                />
                             )}
                         </button>
                     </div>
 
                     {form.formState.errors.password && (
-                        <p className="flex items-center gap-1.5 text-xs font-medium text-rose-400">
-                            <AlertCircle className="size-3.5 shrink-0" />
-                            <span>
+                        <p
+                            id="password-error"
+                            role="alert"
+                            className="flex min-w-0 items-start gap-1.5 break-words text-xs font-medium leading-5 text-rose-400"
+                        >
+                            <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+                            <span className="min-w-0">
                                 {form.formState.errors.password.message}
                             </span>
                         </p>
@@ -275,11 +306,14 @@ export default function LoginForm() {
                 <Button
                     type="submit"
                     disabled={isBusy}
-                    className="w-full rounded-xl bg-teal-400 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-teal-500/20 transition-all hover:bg-teal-300 hover:shadow-teal-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="min-h-11 w-full min-w-0 whitespace-normal rounded-xl bg-teal-400 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-teal-500/20 transition-colors hover:bg-teal-300 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transform-none motion-reduce:transition-none"
                 >
                     {form.formState.isSubmitting ? (
                         <span className="flex items-center justify-center gap-2">
-                            <Loader2 className="size-4 animate-spin" />
+                            <Loader2
+                                aria-hidden="true"
+                                className="size-4 shrink-0 animate-spin motion-reduce:animate-none"
+                            />
                             Signing in...
                         </span>
                     ) : (
@@ -288,18 +322,24 @@ export default function LoginForm() {
                 </Button>
             </form>
 
-            {/* One-click demo access: required by B7A7 */}
-            <div className="space-y-3">
+            {/* Demo accounts */}
+            <section
+                aria-labelledby="demo-login-heading"
+                className="min-w-0 space-y-3"
+            >
                 <div className="space-y-1 text-center">
-                    <p className="text-sm font-semibold text-slate-100">
+                    <h2
+                        id="demo-login-heading"
+                        className="text-sm font-semibold text-slate-100"
+                    >
                         Explore Servexa
-                    </p>
+                    </h2>
                     <p className="text-xs leading-5 text-slate-400">
                         Try the platform using a demo account.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                     {DEMO_ACCOUNTS.map((account) => {
                         const Icon = account.icon;
                         const isLoading =
@@ -312,15 +352,22 @@ export default function LoginForm() {
                                 variant="outline"
                                 disabled={isBusy}
                                 onClick={() => handleDemoLogin(account)}
-                                className="h-auto min-h-11 w-full justify-center gap-2 rounded-xl border-white/10 bg-slate-950/40 px-3 py-3 text-sm font-medium text-slate-200 transition-colors hover:border-teal-400/40 hover:bg-teal-400/10 hover:text-teal-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Sign in with demo ${account.label} account`}
+                                className="h-auto min-h-11 w-full min-w-0 justify-center gap-2 whitespace-normal break-words rounded-xl border-white/10 bg-slate-950/40 px-3 py-3 text-sm font-medium text-slate-200 transition-colors hover:border-teal-400/40 hover:bg-teal-400/10 hover:text-teal-200 focus-visible:ring-2 focus-visible:ring-teal-400 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                             >
                                 {isLoading ? (
-                                    <Loader2 className="size-4 shrink-0 animate-spin" />
+                                    <Loader2
+                                        aria-hidden="true"
+                                        className="size-4 shrink-0 animate-spin motion-reduce:animate-none"
+                                    />
                                 ) : (
-                                    <Icon className="size-4 shrink-0" />
+                                    <Icon
+                                        aria-hidden="true"
+                                        className="size-4 shrink-0"
+                                    />
                                 )}
 
-                                <span>
+                                <span className="min-w-0">
                                     {isLoading
                                         ? "Signing in..."
                                         : `Demo ${account.label}`}
@@ -329,18 +376,20 @@ export default function LoginForm() {
                         );
                     })}
                 </div>
-            </div>
+            </section>
 
             {/* Google sign-in */}
-            <div className="space-y-5">
+            <div className="min-w-0 space-y-5">
                 <div className="relative flex items-center justify-center">
                     <div className="w-full border-t border-white/10" />
-                    <span className="absolute bg-slate-900/90 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <span className="absolute whitespace-nowrap bg-slate-900 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Or continue with
                     </span>
                 </div>
 
-                <GoogleLoginButton />
+                <div className="min-w-0">
+                    <GoogleLoginButton />
+                </div>
             </div>
         </div>
     );

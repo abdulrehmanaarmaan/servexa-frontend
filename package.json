@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "dev": "next dev --turbopack -H localhost",
+    "build": "node ./node_modules/next/dist/bin/next build",
+    "start": "next start -H localhost",
     "lint": "biome check",
     "format": "biome format --write"
   },
