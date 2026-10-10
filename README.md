@@ -1211,7 +1211,7 @@ The backend is deployed using Vercel.
 
 Live URL:
 
-https://servexa-backend.vercel.app/
+https://servexa-backend.vercel.app
 
 The backend requires the production environment variables to be configured through the deployment platform.
 
@@ -1570,7 +1570,7 @@ This project was developed as a full-stack Field Service Management application 
 Full-Stack / MERN Developer
 
 - GitHub: https://github.com/abdulrehmanaarmaan
-- LinkedIn: https://www.linkedin.com/in/abdul-rehman-aarmaan/
+- LinkedIn: https://www.linkedin.com/in/abdul-rehman-aarmaan
 
 ---
 
