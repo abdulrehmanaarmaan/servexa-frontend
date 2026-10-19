@@ -1605,3 +1605,5 @@ Admin Analytics
 ```
 
 The platform combines a modern Next.js frontend with a modular Express.js backend and PostgreSQL database to provide an end-to-end field-service management solution.
+
+Need to change the specific colors for theme.

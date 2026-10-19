@@ -1,9 +1,11 @@
+
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 
-import QueryProvider from "@/providers/QueryProvider";
 import { cn } from "@/lib/utils";
+import QueryProvider from "@/providers/QueryProvider";
+import ThemeProvider from "@/providers/ThemeProvider";
 
 import "./globals.css";
 
@@ -26,23 +28,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-teal-500 selection:text-slate-950">
-        <QueryProvider>
-          {children}
+    <html
+      lang="en"
+      className={cn("font-sans", geist.variable)}
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+        <ThemeProvider>
+          <QueryProvider>
+            {children}
 
-          <Toaster
-            richColors
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: "#090d16",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "#f8fafc",
-              },
-            }}
-          />
-        </QueryProvider>
+            <Toaster
+              richColors
+              position="top-right"
+              toastOptions={{
+                className: "border border-border",
+              }}
+            />
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

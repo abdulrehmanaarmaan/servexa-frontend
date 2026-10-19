@@ -7,6 +7,7 @@ import {
     ShieldAlert,
     FileText,
     UserRoundCog,
+    ChartColumnIncreasing,
 } from "lucide-react";
 
 import StatCard from "@/components/dashboard/StatCard";
@@ -54,11 +55,42 @@ const adminActions = [
 export default async function AdminDashboard() {
     const data = await getAdminDashboard();
 
+    const chartData = [
+        {
+            label: "Total users",
+            value: Number(data.users.total),
+            color: "bg-sky-400",
+        },
+        {
+            label: "Technicians",
+            value: Number(data.technicians.total),
+            color: "bg-violet-400",
+        },
+        {
+            label: "Pending requests",
+            value: Number(data.serviceRequests.pending),
+            color: "bg-amber-400",
+        },
+        {
+            label: "Paid payments",
+            value: Number(data.payments.paid),
+            color: "bg-teal-400",
+        },
+    ];
+
+    const maxValue = Math.max(
+        1,
+        ...chartData.map((item) =>
+            Number.isFinite(item.value) ? Math.max(0, item.value) : 0
+        )
+    );
+
     return (
-        <section className="space-y-8 text-slate-100">
+        <section className="space-y-8 text-slate-100 selection:text-slate-950">
             {/* Header */}
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(45,212,191,0.08),transparent_50%)]" />
+
                 <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/20 bg-teal-400/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-teal-300 shadow-sm backdrop-blur-md">
@@ -104,6 +136,71 @@ export default async function AdminDashboard() {
                 />
             </div>
 
+            {/* Dynamic overview chart */}
+            <section
+                aria-labelledby="admin-overview-chart-title"
+                className="rounded-3xl border border-white/10 bg-slate-900/70 p-5 shadow-xl backdrop-blur-xl sm:p-7"
+            >
+                <div className="flex items-start gap-3">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-teal-400/20 bg-teal-400/10 text-teal-300 shadow-inner">
+                        <ChartColumnIncreasing className="size-5" />
+                    </div>
+
+                    <div>
+                        <h2
+                            id="admin-overview-chart-title"
+                            className="text-lg font-bold text-white sm:text-xl"
+                        >
+                            Operations overview
+                        </h2>
+
+                        <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                            A comparison of the current operational totals returned by Servexa.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    role="img"
+                    aria-label={`Bar chart showing total users: ${data.users.total}, technicians: ${data.technicians.total}, pending requests: ${data.serviceRequests.pending}, and paid payments: ${data.payments.paid}.`}
+                    className="mt-8 space-y-6"
+                >
+                    {chartData.map((item) => {
+                        const value = Number.isFinite(item.value)
+                            ? Math.max(0, item.value)
+                            : 0;
+
+                        const percentage = (value / maxValue) * 100;
+
+                        return (
+                            <div key={item.label} className="space-y-2">
+                                <div className="flex items-center justify-between gap-4">
+                                    <span className="text-sm font-medium text-slate-300">
+                                        {item.label}
+                                    </span>
+
+                                    <span className="text-sm font-bold tabular-nums text-white">
+                                        {value.toLocaleString()}
+                                    </span>
+                                </div>
+
+                                <div className="h-3 overflow-hidden rounded-full bg-slate-800 p-0.5 shadow-inner">
+                                    <div
+                                        className={`h-full rounded-full ${item.color} transition-[width] duration-500`}
+                                        style={{ width: `${percentage}%` }}
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <p className="mt-6 text-xs leading-relaxed text-slate-500">
+                    Values are sourced from the existing admin dashboard data. Bar lengths are
+                    scaled relative to the largest displayed value.
+                </p>
+            </section>
+
             {/* Quick actions */}
             <div className="space-y-5">
                 <div>
@@ -117,8 +214,7 @@ export default async function AdminDashboard() {
                 </div>
 
                 {adminActions.length === 0 ? (
-                    /* Empty State */
-                    <div className="rounded-3xl border border-dashed border-white/10 bg-slate-900/40 px-6 py-16 text-center shadow-xl backdrop-blur-xl">
+                    <div className="rounded-3xl border border-dashed border-white/15 bg-slate-900/40 px-6 py-16 text-center shadow-xl backdrop-blur-xl">
                         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-teal-400/20 bg-teal-400/10 text-teal-300 shadow-inner">
                             <ShieldAlert className="size-6" />
                         </div>
@@ -163,10 +259,10 @@ function AdminQuickAction({
     return (
         <Link
             href={href}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/40 hover:shadow-teal-500/5 sm:p-7"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/40 hover:shadow-teal-500/10 sm:p-7"
         >
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-400 to-emerald-400 opacity-0 transition-opacity group-hover:opacity-100" />
-            
+
             <div className="space-y-4">
                 <div className="flex size-12 items-center justify-center rounded-2xl border border-teal-400/20 bg-teal-400/10 text-teal-300 shadow-inner">
                     <Icon className="size-5" />
@@ -185,7 +281,9 @@ function AdminQuickAction({
 
             <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-teal-400 transition-colors group-hover:text-teal-300">
                 <span>Open module</span>
-                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                </span>
             </div>
         </Link>
     );

@@ -3,21 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Bell,
+  CalendarClock,
   ClipboardList,
+  CreditCard,
   FileText,
   LayoutDashboard,
   LogOut,
+  MapPin,
+  ScrollText,
+  User,
+  UserRoundCog,
   Users,
   Wrench,
-  CreditCard,
-  UserRoundCog,
-  CalendarClock,
-  ScrollText,
-  Zap,
-  User,
-  Bell,
-  MapPin,
   X,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -193,8 +193,8 @@ export default function Sidebar() {
       const message =
         error instanceof Error ? error.message : "Unknown logout error";
 
-      console.error(message);
-      toast.error("Unable to sign out.");
+      console.error("Logout failed:", message);
+      toast.error("Unable to sign out. Please try again.");
     }
   }
 
@@ -208,10 +208,11 @@ export default function Sidebar() {
       <button
         type="button"
         aria-label="Close sidebar"
+        aria-hidden={!sidebarOpen}
         tabIndex={sidebarOpen ? 0 : -1}
         onClick={closeSidebar}
         className={cn(
-          "fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px] transition-opacity duration-200 lg:hidden",
+          "fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm transition-opacity duration-300 lg:hidden",
           sidebarOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0",
@@ -220,21 +221,22 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
+        aria-label="Dashboard navigation"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/10 bg-slate-950 transition-transform duration-300 ease-in-out lg:z-40 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/10 bg-slate-950/95 backdrop-blur-xl transition-transform duration-300 ease-in-out lg:z-40 lg:translate-x-0 shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        {/* Brand Header */}
+        {/* Brand header */}
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-6">
           <Link
             href="/"
             onClick={closeSidebar}
-            className="group flex items-center gap-2 text-xl font-black tracking-tight text-white transition-opacity hover:opacity-90"
+            className="group flex items-center gap-2.5 text-xl font-black tracking-tight text-white transition-opacity hover:opacity-90"
           >
-            <div className="flex size-8 items-center justify-center rounded-lg bg-teal-400/10 ring-1 ring-teal-400/30 transition-all group-hover:bg-teal-400/20">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-teal-400/10 shadow-inner ring-1 ring-teal-400/30 transition-colors group-hover:bg-teal-400/20">
               <Zap className="size-4 text-teal-400" />
-            </div>
+            </span>
 
             <span>
               Serve<span className="text-teal-400">xa</span>
@@ -245,30 +247,37 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={closeSidebar}
-            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+            className="flex size-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 lg:hidden"
             aria-label="Close sidebar"
           >
             <X className="size-5" />
           </button>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 space-y-1.5 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/10">
+        {/* Role-based navigation */}
+        <nav
+          aria-label="Main navigation"
+          className="flex-1 space-y-1.5 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+        >
           {items.map((item) => {
             const Icon = item.icon;
 
             const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+              item.label === "Dashboard"
+                ? pathname === item.href
+                : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={closeSidebar}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                  "group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400",
                   active
-                    ? "bg-teal-400/10 font-semibold text-teal-300 ring-1 ring-teal-400/20"
+                    ? "bg-teal-400/10 font-semibold text-teal-300 shadow-inner ring-1 ring-teal-400/30"
                     : "text-slate-400 hover:bg-white/5 hover:text-slate-200",
                 )}
               >
@@ -279,6 +288,7 @@ export default function Sidebar() {
                       ? "text-teal-400"
                       : "text-slate-400 group-hover:text-slate-200",
                   )}
+                  aria-hidden="true"
                 />
 
                 <span>{item.label}</span>
@@ -287,14 +297,14 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Bottom Footer Actions */}
-        <div className="shrink-0 border-t border-white/10 p-4">
+        {/* Sidebar footer */}
+        <div className="shrink-0 border-t border-white/10 p-4 bg-slate-950/50">
           <button
             type="button"
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-rose-400 transition-all hover:bg-rose-500/10 hover:text-rose-300 active:scale-[0.98]"
+            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-rose-400 transition-all hover:bg-rose-500/10 hover:text-rose-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 active:scale-[0.98]"
           >
-            <LogOut className="size-4 shrink-0" />
+            <LogOut className="size-4 shrink-0" aria-hidden="true" />
             <span>Sign out</span>
           </button>
         </div>

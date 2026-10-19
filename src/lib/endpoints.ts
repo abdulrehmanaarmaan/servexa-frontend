@@ -23,6 +23,12 @@ export const endpoints = {
     services: {
         list: "services",
         detail: (id: string) => `services/${id}`,
+        uploadImage: "services/upload-image",
+    },
+
+    ai: {
+        serviceAssistant: "ai/service-assistant",
+        serviceRequestHelper: "ai/service-request-helper",
     },
 
     requests: {

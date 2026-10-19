@@ -3,7 +3,7 @@ import { CreditCard, FileText } from "lucide-react";
 
 export default function CustomerInvoicesPage() {
   return (
-    <div className="space-y-6 text-slate-100 selection:bg-teal-500 selection:text-slate-950">
+    <div className="space-y-6 text-slate-100 selection:text-slate-950">
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>

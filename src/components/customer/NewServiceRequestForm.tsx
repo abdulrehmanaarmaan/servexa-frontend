@@ -19,12 +19,7 @@ import { z } from "zod";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
     Select,
@@ -43,6 +38,7 @@ import {
     type CreateServiceRequestPayload,
 } from "@/services/request.service";
 import { serviceService } from "@/services/service.service";
+import ServiceRequestAiHelper from "../ai/ServiceRequestAiHelper";
 
 type Values = z.infer<typeof createServiceRequestSchema>;
 
@@ -121,31 +117,27 @@ export default function NewServiceRequestForm({
         createRequestMutation.mutate(payload);
     };
 
-    const isLoading =
-        servicesQuery.isLoading || addressesQuery.isLoading;
+    const isLoading = servicesQuery.isLoading || addressesQuery.isLoading;
 
     const isSubmitting = createRequestMutation.isPending;
 
     const hasAddresses = (addressesQuery.data?.length ?? 0) > 0;
 
     return (
-        <Card className="overflow-hidden border-white/10 bg-slate-900 shadow-xl backdrop-blur-xl">
-            <CardHeader className="border-b border-white/10 bg-slate-900/80 px-5 py-4 sm:px-6">
+        <Card className="overflow-hidden border-white/10 bg-slate-900/80 shadow-2xl backdrop-blur-xl">
+            <CardHeader className="border-b border-white/5 bg-slate-950/40 px-6 py-5">
                 <CardTitle className="text-base font-bold text-white sm:text-lg">
                     Request Details
                 </CardTitle>
             </CardHeader>
 
-            <CardContent className="p-5 sm:p-6">
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
-                >
+            <CardContent className="p-6 sm:p-8">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     {/* Service Selection */}
                     <div className="space-y-2">
                         <Label
                             htmlFor="service"
-                            className="text-xs font-semibold uppercase tracking-wider text-slate-300 sm:text-sm"
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-300"
                         >
                             Service
                         </Label>
@@ -162,21 +154,17 @@ export default function NewServiceRequestForm({
                         >
                             <SelectTrigger
                                 id="service"
-                                className="h-10 w-full rounded-xl border-white/10 bg-slate-950 text-sm text-slate-100 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20 sm:h-11"
+                                className="h-11 w-full rounded-xl border-white/10 bg-slate-950 px-4 text-sm text-slate-100 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20"
                             >
                                 <div className="flex items-center gap-2 truncate">
                                     <Wrench className="size-4 shrink-0 text-teal-400" />
-
                                     <SelectValue placeholder="Select a service" />
                                 </div>
                             </SelectTrigger>
 
                             <SelectContent className="border-white/10 bg-slate-900 text-slate-100 backdrop-blur-xl">
                                 {servicesQuery.data?.data?.map((service) => (
-                                    <SelectItem
-                                        key={service.id}
-                                        value={service.id}
-                                    >
+                                    <SelectItem key={service.id} value={service.id}>
                                         {service.name}
                                     </SelectItem>
                                 ))}
@@ -184,17 +172,14 @@ export default function NewServiceRequestForm({
                         </Select>
 
                         {form.formState.errors.serviceId && (
-                            <p className="text-xs font-medium text-rose-400 sm:text-sm">
-                                {
-                                    form.formState.errors.serviceId
-                                        .message
-                                }
+                            <p className="text-xs font-medium text-rose-400">
+                                {form.formState.errors.serviceId.message}
                             </p>
                         )}
 
                         {/* Selected Service Details */}
                         {selectedService && (
-                            <div className="rounded-xl border border-teal-400/20 bg-slate-950/80 p-3.5 sm:p-4">
+                            <div className="mt-3 rounded-xl border border-teal-400/20 bg-slate-950/60 p-4 shadow-inner">
                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-bold text-white">
@@ -203,19 +188,14 @@ export default function NewServiceRequestForm({
 
                                         {selectedService.description && (
                                             <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                                                {
-                                                    selectedService.description
-                                                }
+                                                {selectedService.description}
                                             </p>
                                         )}
                                     </div>
 
                                     <p className="shrink-0 text-sm font-black text-teal-400 sm:text-base">
-                                        {selectedService.basePrice !=
-                                        null
-                                            ? `৳${Number(
-                                                  selectedService.basePrice,
-                                              ).toLocaleString()}`
+                                        {selectedService.basePrice != null
+                                            ? `৳${Number(selectedService.basePrice).toLocaleString()}`
                                             : "Price varies"}
                                     </p>
                                 </div>
@@ -226,15 +206,13 @@ export default function NewServiceRequestForm({
                         {servicesQuery.isError && (
                             <Alert
                                 variant="destructive"
-                                className="mt-3 border-rose-500/30 bg-rose-500/10 text-rose-300"
+                                className="mt-3 border-rose-500/30 bg-rose-500/10 text-rose-300 backdrop-blur-md"
                             >
                                 <AlertTriangle className="size-4 text-rose-400" />
-
-                                <AlertTitle className="text-xs font-bold text-rose-200 sm:text-sm">
+                                <AlertTitle className="text-xs font-bold text-rose-200">
                                     Unable to load services
                                 </AlertTitle>
-
-                                <AlertDescription className="text-xs text-rose-300/90 sm:text-sm">
+                                <AlertDescription className="text-xs text-rose-300/90">
                                     {servicesQuery.error instanceof Error
                                         ? servicesQuery.error.message
                                         : "Failed to load available services."}
@@ -247,7 +225,7 @@ export default function NewServiceRequestForm({
                     <div className="space-y-2">
                         <Label
                             htmlFor="address"
-                            className="text-xs font-semibold uppercase tracking-wider text-slate-300 sm:text-sm"
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-300"
                         >
                             Service Address
                         </Label>
@@ -261,18 +239,15 @@ export default function NewServiceRequestForm({
                                 });
                             }}
                             disabled={
-                                addressesQuery.isLoading ||
-                                isSubmitting ||
-                                !hasAddresses
+                                addressesQuery.isLoading || isSubmitting || !hasAddresses
                             }
                         >
                             <SelectTrigger
                                 id="address"
-                                className="h-10 w-full rounded-xl border-white/10 bg-slate-950 text-sm text-slate-100 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20 disabled:opacity-50 sm:h-11"
+                                className="h-11 w-full rounded-xl border-white/10 bg-slate-950 px-4 text-sm text-slate-100 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20 disabled:opacity-50"
                             >
                                 <div className="flex items-center gap-2 truncate">
                                     <MapPin className="size-4 shrink-0 text-teal-400" />
-
                                     <SelectValue
                                         placeholder={
                                             !hasAddresses
@@ -285,23 +260,16 @@ export default function NewServiceRequestForm({
 
                             <SelectContent className="border-white/10 bg-slate-900 text-slate-100 backdrop-blur-xl">
                                 {addressesQuery.data?.map((address) => (
-                                    <SelectItem
-                                        key={address.id}
-                                        value={address.id}
-                                    >
-                                        {address.addressLine},{" "}
-                                        {address.city}
+                                    <SelectItem key={address.id} value={address.id}>
+                                        {address.addressLine}, {address.city}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
 
                         {form.formState.errors.addressId && (
-                            <p className="text-xs font-medium text-rose-400 sm:text-sm">
-                                {
-                                    form.formState.errors.addressId
-                                        .message
-                                }
+                            <p className="text-xs font-medium text-rose-400">
+                                {form.formState.errors.addressId.message}
                             </p>
                         )}
 
@@ -311,15 +279,12 @@ export default function NewServiceRequestForm({
                             !hasAddresses && (
                                 <Alert className="mt-3 border-amber-500/30 bg-amber-500/10 text-amber-200 backdrop-blur-md">
                                     <AlertTriangle className="size-4 text-amber-400" />
-
-                                    <AlertTitle className="text-xs font-bold text-amber-200 sm:text-sm">
+                                    <AlertTitle className="text-xs font-bold text-amber-200">
                                         No saved addresses found
                                     </AlertTitle>
-
-                                    <AlertDescription className="mt-1 flex flex-col gap-3 text-xs text-amber-300/90 sm:flex-row sm:items-center sm:justify-between">
+                                    <AlertDescription className="mt-2 flex flex-col gap-3 text-xs text-amber-300/90 sm:flex-row sm:items-center sm:justify-between">
                                         <span>
-                                            Please add an address before
-                                            submitting a service request.
+                                            Please add an address before submitting a service request.
                                         </span>
 
                                         <Link
@@ -329,7 +294,7 @@ export default function NewServiceRequestForm({
                                                     variant: "outline",
                                                     size: "xs",
                                                 }),
-                                                "inline-flex shrink-0 items-center border-amber-400/30 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20 hover:text-white",
+                                                "inline-flex shrink-0 items-center rounded-xl border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-amber-200 hover:bg-amber-400/20 hover:text-white transition-all",
                                             )}
                                         >
                                             <Plus className="mr-1 size-3" />
@@ -343,15 +308,13 @@ export default function NewServiceRequestForm({
                         {addressesQuery.isError && (
                             <Alert
                                 variant="destructive"
-                                className="mt-3 border-rose-500/30 bg-rose-500/10 text-rose-300"
+                                className="mt-3 border-rose-500/30 bg-rose-500/10 text-rose-300 backdrop-blur-md"
                             >
                                 <AlertTriangle className="size-4 text-rose-400" />
-
-                                <AlertTitle className="text-xs font-bold text-rose-200 sm:text-sm">
+                                <AlertTitle className="text-xs font-bold text-rose-200">
                                     Unable to load addresses
                                 </AlertTitle>
-
-                                <AlertDescription className="text-xs text-rose-300/90 sm:text-sm">
+                                <AlertDescription className="text-xs text-rose-300/90">
                                     {addressesQuery.error instanceof Error
                                         ? addressesQuery.error.message
                                         : "Failed to load your saved addresses."}
@@ -364,7 +327,7 @@ export default function NewServiceRequestForm({
                     <div className="space-y-2">
                         <Label
                             htmlFor="scheduledAt"
-                            className="text-xs font-semibold uppercase tracking-wider text-slate-300 sm:text-sm"
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-300"
                         >
                             Preferred Date & Time
                         </Label>
@@ -377,16 +340,13 @@ export default function NewServiceRequestForm({
                                 type="datetime-local"
                                 {...form.register("scheduledAt")}
                                 disabled={isSubmitting}
-                                className="h-10 w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 text-sm text-slate-100 outline-none transition-all [color-scheme:dark] focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20 disabled:cursor-not-allowed disabled:opacity-60 sm:h-11"
+                                className="h-11 w-full rounded-xl border border-white/10 bg-slate-950 pl-10 pr-4 text-sm text-slate-100 outline-none transition-all [color-scheme:dark] focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20 disabled:cursor-not-allowed disabled:opacity-60"
                             />
                         </div>
 
                         {form.formState.errors.scheduledAt && (
-                            <p className="text-xs font-medium text-rose-400 sm:text-sm">
-                                {
-                                    form.formState.errors.scheduledAt
-                                        .message
-                                }
+                            <p className="text-xs font-medium text-rose-400">
+                                {form.formState.errors.scheduledAt.message}
                             </p>
                         )}
                     </div>
@@ -395,7 +355,7 @@ export default function NewServiceRequestForm({
                     <div className="space-y-2">
                         <Label
                             htmlFor="priority"
-                            className="text-xs font-semibold uppercase tracking-wider text-slate-300 sm:text-sm"
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-300"
                         >
                             Priority
                         </Label>
@@ -403,49 +363,31 @@ export default function NewServiceRequestForm({
                         <Select
                             value={form.watch("priority")}
                             onValueChange={(value) => {
-                                form.setValue(
-                                    "priority",
-                                    value as Values["priority"],
-                                    {
-                                        shouldValidate: true,
-                                        shouldDirty: true,
-                                    },
-                                );
+                                form.setValue("priority", value as Values["priority"], {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                });
                             }}
                             disabled={isSubmitting}
                         >
                             <SelectTrigger
                                 id="priority"
-                                className="h-10 w-full rounded-xl border-white/10 bg-slate-950 text-sm text-slate-100 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20 sm:h-11"
+                                className="h-11 w-full rounded-xl border-white/10 bg-slate-950 px-4 text-sm text-slate-100 backdrop-blur-sm transition-all focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20"
                             >
                                 <SelectValue />
                             </SelectTrigger>
 
                             <SelectContent className="border-white/10 bg-slate-900 text-slate-100 backdrop-blur-xl">
-                                <SelectItem value="LOW">
-                                    Low
-                                </SelectItem>
-
-                                <SelectItem value="NORMAL">
-                                    Normal
-                                </SelectItem>
-
-                                <SelectItem value="HIGH">
-                                    High
-                                </SelectItem>
-
-                                <SelectItem value="URGENT">
-                                    Urgent
-                                </SelectItem>
+                                <SelectItem value="LOW">Low</SelectItem>
+                                <SelectItem value="NORMAL">Normal</SelectItem>
+                                <SelectItem value="HIGH">High</SelectItem>
+                                <SelectItem value="URGENT">Urgent</SelectItem>
                             </SelectContent>
                         </Select>
 
                         {form.formState.errors.priority && (
-                            <p className="text-xs font-medium text-rose-400 sm:text-sm">
-                                {
-                                    form.formState.errors.priority
-                                        .message
-                                }
+                            <p className="text-xs font-medium text-rose-400">
+                                {form.formState.errors.priority.message}
                             </p>
                         )}
                     </div>
@@ -454,7 +396,7 @@ export default function NewServiceRequestForm({
                     <div className="space-y-2">
                         <Label
                             htmlFor="description"
-                            className="text-xs font-semibold uppercase tracking-wider text-slate-300 sm:text-sm"
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-300"
                         >
                             Description
                         </Label>
@@ -464,29 +406,35 @@ export default function NewServiceRequestForm({
                             {...form.register("description")}
                             disabled={isSubmitting}
                             placeholder="Describe the service you need..."
-                            className="min-h-32 rounded-xl border-white/10 bg-slate-950 text-sm text-slate-100 placeholder:text-slate-500 focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20"
+                            className="min-h-32 rounded-xl border-white/10 bg-slate-950 p-4 text-sm text-slate-100 placeholder:text-slate-500 focus:border-teal-400/80 focus:ring-2 focus:ring-teal-400/20"
                         />
 
                         <div className="flex items-center justify-between gap-4">
                             {form.formState.errors.description ? (
-                                <p className="text-xs font-medium text-rose-400 sm:text-sm">
-                                    {
-                                        form.formState.errors.description
-                                            .message
-                                    }
+                                <p className="text-xs font-medium text-rose-400">
+                                    {form.formState.errors.description.message}
                                 </p>
                             ) : (
-                                <p className="text-xs text-slate-500">
-                                    Minimum 10 characters.
-                                </p>
+                                <p className="text-xs text-slate-500">Minimum 10 characters.</p>
                             )}
 
                             <span className="shrink-0 font-mono text-xs text-slate-500">
-                                {(
-                                    form.watch("description") || ""
-                                ).length}
-                                /2000
+                                {(form.watch("description") || "").length}/2000
                             </span>
+                        </div>
+
+                        {/* AI assistance */}
+                        <div className="pt-2">
+                            <ServiceRequestAiHelper
+                                description={form.watch("description") || ""}
+                                disabled={isSubmitting}
+                                onApplySuggestion={(improvedDescription) => {
+                                    form.setValue("description", improvedDescription, {
+                                        shouldValidate: true,
+                                        shouldDirty: true,
+                                    });
+                                }}
+                            />
                         </div>
                     </div>
 
@@ -497,14 +445,11 @@ export default function NewServiceRequestForm({
                             className="border-rose-500/30 bg-rose-500/10 text-rose-300 backdrop-blur-md"
                         >
                             <AlertTriangle className="size-4 text-rose-400" />
-
-                            <AlertTitle className="text-xs font-bold text-rose-200 sm:text-sm">
+                            <AlertTitle className="text-xs font-bold text-rose-200">
                                 Submission Failed
                             </AlertTitle>
-
-                            <AlertDescription className="text-xs text-rose-300/90 sm:text-sm">
-                                {createRequestMutation.error instanceof
-                                Error
+                            <AlertDescription className="text-xs text-rose-300/90">
+                                {createRequestMutation.error instanceof Error
                                     ? createRequestMutation.error.message
                                     : "Failed to create the service request. Please try again."}
                             </AlertDescription>
@@ -517,24 +462,16 @@ export default function NewServiceRequestForm({
                             type="button"
                             variant="outline"
                             disabled={isSubmitting}
-                            onClick={() =>
-                                router.push(
-                                    "/dashboard/customer/requests",
-                                )
-                            }
-                            className="h-10 w-full border-white/10 bg-transparent text-slate-300 hover:bg-white/5 hover:text-white sm:h-9 sm:w-auto"
+                            onClick={() => router.push("/dashboard/customer/requests")}
+                            className="h-11 w-full border-white/10 bg-slate-950/60 text-slate-300 hover:bg-slate-800 hover:text-white sm:w-auto rounded-xl"
                         >
                             Cancel
                         </Button>
 
                         <Button
                             type="submit"
-                            disabled={
-                                isSubmitting ||
-                                isLoading ||
-                                !hasAddresses
-                            }
-                            className="h-10 w-full bg-teal-400 font-semibold text-slate-950 shadow-lg shadow-teal-500/20 transition-all hover:bg-teal-300 hover:shadow-teal-500/30 active:scale-[0.98] sm:h-9 sm:w-auto"
+                            disabled={isSubmitting || isLoading || !hasAddresses}
+                            className="h-11 w-full bg-teal-400 font-semibold text-slate-950 shadow-lg shadow-teal-500/20 transition-all hover:bg-teal-300 active:scale-[0.98] sm:w-auto rounded-xl"
                         >
                             {isSubmitting ? (
                                 <>

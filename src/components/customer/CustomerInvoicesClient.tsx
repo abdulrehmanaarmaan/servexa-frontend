@@ -238,7 +238,7 @@ export default function CustomerInvoicesClient() {
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, index) => (
           <div
-            key={`invoice-skeleton-${index}`}
+            key={`invoice-skeleton-${index!}`}
             className="h-64 animate-pulse rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl"
           />
         ))}

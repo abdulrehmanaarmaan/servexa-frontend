@@ -30,7 +30,7 @@ function findValue(
   value: unknown,
   keys: string[],
 ): string | undefined {
-  if (!value || typeof value !== "object") {
+  if (!value || typeof value !== "object") {``
     return undefined;
   }
 
